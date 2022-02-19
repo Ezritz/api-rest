@@ -150,7 +150,7 @@
                         
                     });
                 } else{
-                    //Update-PATCH
+                    // Update-PATCH
                     ajax({
                         url: `http://localhost:3000/users/${e.target.id.value}`,
                         method: "PATCH",
@@ -171,21 +171,31 @@
 
         d.addEventListener("click", e => {
             if(e.target.matches(".edit")){
+                alert(`Estas por editar al usuario ${e.target.dataset.name}`)
                 $title.textContent = "Editar usuario";
                 $form.nombre.value = e.target.dataset.name;
                 $form.usuario.value = e.target.dataset.username;
                 $form.email.value = e.target.dataset.email;
                 $form.sitioweb.value = e.target.dataset.website;
                 $form.id.value = e.target.dataset.id;
+            }
 
+            if(e.target.matches(".delete")){
+                let isDelete = confirm(`Estas seguro de eliminar el usuario ${e.target.dataset.id}?`);
+                
+                // DELETE
+                if(isDelete){
+                    ajax({
+                        url: `http://localhost:3000/users/${e.target.dataset.id}`,
+                        method: "DELETE",
+                        success:(res) => locationReload(),
+                        error:() => alert(err),
+                        
+                    });
+                }
                 
             }
-            if(e.target.matches(".delete")){
-                $title.textContent = "Eliminar usuario";
-                $form.id.value = e.target.dataset.id;
-            }
-        })
-
+        });
     </script>
 </body>
 </html>
