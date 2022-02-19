@@ -12,15 +12,16 @@
         <article>
             <h2 class="crud-title">Agregar usuario</h2>
             <form class="crud-form">
-                <input type="text" name="nombre" placeholder="Ingresa tu nombre" required></input>
+                <input type="text" name="nombre" placeholder="Ingresa tu nombre"></input>
                 <br>
                 <input type="text" name="usuario" placeholder="Ingresa tu usuario"></input>
                 <br>
-                <input type="email" name="email" placeholder="ejemplo@.ejemplo.com" required></input>
+                <input type="email" name="email" placeholder="ejemplo@.ejemplo.com"></input>
                 <br>
-                <input type="text" placeholder="sitioweb.com"></input>
+                <input type="text" name="sitioweb" placeholder="sitioweb.com"></input>
                 <br>
-                <button>Enviar</button>
+                <input type="submit" value="Enviar"></input>
+                <input type="hidden" name="id">
             </form>
         </article>
         <article>
@@ -29,7 +30,9 @@
                 <thead>
                     <tr>
                         <th>Nombre</th>
+                        <th>Usuario</th>
                         <th>Email</th>
+                        <th>Sitio web</th>
                         <th>Acciones</th>
                         
                     </tr>
@@ -43,7 +46,9 @@
     <template id="crud-template">
         <tr>
             <td class="name"></td>
+            <td class="username"></td>
             <td class="email"></td>
+            <td class="sitioweb"></td>
             <td>
                 <button class="edit">Editar</button>
                 <button class="delete">Eliminar</button>
@@ -93,10 +98,14 @@
 
                         // dentro de template buscamos el selector name y en su contenido ponemos lo que viene en <td>name // en este caso insertara los botones
                         $template.querySelector(".name").textContent=elem.name;
+                        $template.querySelector(".username").textContent = elem.username;
                         $template.querySelector(".email").textContent=elem.email;
+                        $template.querySelector(".sitioweb").textContent = elem.website;
                         $template.querySelector(".edit").dataset.id = elem.id;
                         $template.querySelector(".edit").dataset.name = elem.name;
+                        $template.querySelector(".edit").dataset.username = elem.username;
                         $template.querySelector(".edit").dataset.email = elem.email;
+                        $template.querySelector(".edit").dataset.website = elem.website;
                         $template.querySelector(".delete").dataset.id = elem.id;
 
                         // clonamos el template, para permanecer en memoria, inicializando en true para que tenga el 
@@ -120,6 +129,62 @@
             })
         }
         d.addEventListener("DOMContentLoaded", getAllUsers);
+
+        d.addEventListener("submit", e =>{
+            if(e.target === $form) {
+                e.preventDefault();
+
+                if(!e.target.id.value){
+                    // create-POST
+                    ajax({
+                        url: "http://localhost:3000/users",
+                        method: "POST",
+                        success:(res) => locationReload(),
+                        error:() => $form.insertAdjacentHTML("afterend",`<p><b>${err}</b></p>`),
+                        data: {
+                            name: e.target.nombre.value,
+                            username: e.target.usuario.value,
+                            email: e.target.email.value,
+                            website: e.target.sitioweb.value
+                        }
+                        
+                    });
+                } else{
+                    //Update-PATCH
+                    ajax({
+                        url: `http://localhost:3000/users/${e.target.id.value}`,
+                        method: "PATCH",
+                        success:(res) => locationReload(),
+                        error:() => $form.insertAdjacentHTML("afterend",`<p><b>${err}</b></p>`),
+                        data: {
+                            name: e.target.nombre.value,
+                            username: e.target.usuario.value,
+                            email: e.target.email.value,
+                            website: e.target.sitioweb.value
+                        }
+                        
+                    });
+                }
+            }
+            
+        });
+
+        d.addEventListener("click", e => {
+            if(e.target.matches(".edit")){
+                $title.textContent = "Editar usuario";
+                $form.nombre.value = e.target.dataset.name;
+                $form.usuario.value = e.target.dataset.username;
+                $form.email.value = e.target.dataset.email;
+                $form.sitioweb.value = e.target.dataset.website;
+                $form.id.value = e.target.dataset.id;
+
+                
+            }
+            if(e.target.matches(".delete")){
+                $title.textContent = "Eliminar usuario";
+                $form.id.value = e.target.dataset.id;
+            }
+        })
 
     </script>
 </body>
