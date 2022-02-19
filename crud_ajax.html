@@ -25,10 +25,11 @@
         </article>
         <article>
             <h2>Ver Usuarios</h2>
-            <table class="crud">
+            <table class="crud-table">
                 <thead>
                     <tr>
-                        <th>Usuarios</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
                         <th>Acciones</th>
                         
                     </tr>
@@ -56,6 +57,69 @@
         $title = d.querySelector(".crud-title"),
         $template = d.getElementById("crud-template").content,
         $fragment = d.createDocumentFragment();
+
+        const ajax = (options) => {
+            let {url, method, success, error, data } = options;
+            const xhr = new XMLHttpRequest();
+
+            xhr.addEventListener("readystatechange", e => {
+                if(xhr.readyState !== 4) return;
+
+                console.log(xhr);
+                if(xhr.status >= 200 && xhr.status < 300) {
+                    let json = JSON.parse(xhr.responseText);
+                    success(json);
+
+                }else{
+                    let message = xhr.statusText || "Ocurrio un error";
+                    error(`Error ${xhr.status}: ${message}`);
+                }
+            });
+
+            xhr.open(method || "GET", url);
+            xhr.setRequestHeader("Content-type","application/json;charset=utf-8");
+            xhr.send(JSON.stringify(data));
+        }
+
+        const getAllUsers =() => {
+            ajax({
+                method: "GET",
+                url: "http://localhost:3000/users",
+                success: (res) => {
+                    console.log(res);
+
+                    // traemos los elementos que se encuentran en json
+                    res.forEach((elem) => {
+
+                        // dentro de template buscamos el selector name y en su contenido ponemos lo que viene en <td>name // en este caso insertara los botones
+                        $template.querySelector(".name").textContent=elem.name;
+                        $template.querySelector(".email").textContent=elem.email;
+                        $template.querySelector(".edit").dataset.id = elem.id;
+                        $template.querySelector(".edit").dataset.name = elem.name;
+                        $template.querySelector(".edit").dataset.email = elem.email;
+                        $template.querySelector(".delete").dataset.id = elem.id;
+
+                        // clonamos el template, para permanecer en memoria, inicializando en true para que tenga el 
+                        // contenido que enviamos
+                        let $clone = d.importNode($template,true);
+                        // aqui ya tenemos los elementos que se mandaran al DOM
+                        $fragment.appendChild($clone);
+                    });
+                    // dentro de la etiqueta table, buscamos las etiquetas tbody y agregamos el fragmento al tbody de la tabla
+                    // enviamos a la tabla el contenido del nodo clonado
+                    $table.querySelector("tbody").appendChild($fragment);
+                },
+                error: (err) => {
+                    console.log(err);
+
+                    // insertamos el error con metodo insertAdjacentHTML debajo de la tabla
+                    $table.insertAdjacentHTML("afterend",`<p><b>${err}</b></p>`);
+
+                    
+                }
+            })
+        }
+        d.addEventListener("DOMContentLoaded", getAllUsers);
 
     </script>
 </body>
